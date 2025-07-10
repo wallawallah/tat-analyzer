@@ -1,0 +1,37 @@
+[global]
+# Development mode
+developmentMode = false
+
+[server]
+# Server settings
+port = 8501
+enableXsrfProtection = true
+maxUploadSize = 200
+
+# Address to bind to
+address = "localhost"
+
+# Enable websocket compression
+enableWebsocketCompression = true
+
+[browser]
+# Browser settings
+gatherUsageStats = false
+
+[theme]
+# Theme settings - Light theme
+base = "light"
+primaryColor = "#2E86AB"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F8F9FA"
+textColor = "#262730"
+font = "sans serif"
+
+[runner]
+# Runner settings
+magicEnabled = true
+
+[logger]
+# Logger settings
+level = "info"
+messageFormat = "%(asctime)s %(message)s"
