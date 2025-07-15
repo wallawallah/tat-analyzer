@@ -33,7 +33,6 @@ The dashboard will open in your browser at `http://localhost:8501`
 ### Loading Data
 
 1. **Upload CSV**: Use the sidebar to upload your TAT CSV export file
-2. **Sample Data**: Use the included sample data to explore features
 
 ### Navigation
 
@@ -94,12 +93,16 @@ tat-analyzer/
 │   ├── 03_trade_details.py
 │   └── 04_risk_analysis.py
 ├── utils/                    # Utility modules
+│   ├── __init__.py          # Package initialization
 │   ├── data_loader.py        # CSV loading and preprocessing
 │   ├── calculations.py       # Trade analysis functions
 │   ├── charts.py            # Plotly chart functions
-│   └── constants.py         # Constants and configuration
-├── .streamlit/              # Streamlit configuration
-└── pyproject.toml           # Dependencies and project config
+│   ├── constants.py         # Constants and configuration
+│   └── filters.py           # Data filtering utilities
+├── pyproject.toml           # Dependencies and project config
+├── uv.lock                  # Dependency lock file
+├── CLAUDE.md                # AI development guidelines
+└── README.md                # This file
 ```
 
 ## Dependencies
