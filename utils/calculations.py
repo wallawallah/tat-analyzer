@@ -66,7 +66,7 @@ def calculate_win_rate(df: pd.DataFrame) -> dict[str, float]:
         return {}
 
     winners = df[df['IsWinner']]
-    losers = df[not df['IsWinner']]
+    losers = df[~df['IsWinner']]
 
     # Calculate trade status breakdowns
     stopped_trades = len(df[df['Status'] == 'Stopped']) if 'Status' in df.columns else 0
@@ -325,7 +325,7 @@ def _calculate_expectancy(df: pd.DataFrame) -> float:
         return 0.0
 
     winners = df[df['IsWinner']]
-    losers = df[not df['IsWinner']]
+    losers = df[~df['IsWinner']]
 
     if len(winners) == 0 or len(losers) == 0:
         return df['NetPnL'].mean()
