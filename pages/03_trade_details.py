@@ -61,7 +61,7 @@ def main():
     # Add P&L range filter
     min_pnl = float(df['NetPnL'].min())
     max_pnl = float(df['NetPnL'].max())
-    filter_manager.add_numeric_range("pnl_range", "P&L Range ($)", "NetPnL", min_pnl, max_pnl, 1.0, "${:,.2f}")
+    filter_manager.add_numeric_range("pnl_range", "P&L Range ($)", "NetPnL", min_pnl, max_pnl, 1.0, "$%.2f")
 
     # Add search filter
     search_columns = ['TradeID', 'Strategy', 'TradeType', 'Status', 'StopType']

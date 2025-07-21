@@ -3,6 +3,8 @@ Risk Analysis page for TAT-Analyzer dashboard.
 
 This page provides comprehensive risk analysis including drawdown analysis,
 risk metrics, and various risk-related visualizations.
+
+DISABLED: This page is currently disabled and will not be accessible.
 """
 
 import sys
@@ -30,6 +32,11 @@ from utils.constants import CHART_COLORS, RISK_METRICS_DESCRIPTIONS, STREAMLIT_S
 st.markdown(STREAMLIT_STYLE, unsafe_allow_html=True)
 
 st.title("⚠️ Risk Analysis")
+
+# Disable this page
+st.error("🚫 This page has been disabled.")
+st.info("Risk analysis functionality is currently unavailable.")
+st.stop()
 
 
 def main():
