@@ -23,15 +23,15 @@ CHART_THEME = {
     'template': 'plotly_white',
     'height': 500,
     'showlegend': True,
-    'legend': dict(
-        orientation="h",
-        yanchor="bottom",
-        y=1.02,
-        xanchor="right",
-        x=1
-    ),
-    'margin': dict(l=50, r=50, t=80, b=50),
-    'font': dict(size=12),
+    'legend': {
+        'orientation': "h",
+        'yanchor': "bottom",
+        'y': 1.02,
+        'xanchor': "right",
+        'x': 1
+    },
+    'margin': {'l': 50, 'r': 50, 't': 80, 'b': 50},
+    'font': {'size': 12},
     'plot_bgcolor': 'white',
     'paper_bgcolor': 'white'
 }
@@ -172,7 +172,7 @@ STREAMLIT_STYLE = """
         text-align: center;
         margin-bottom: 2rem;
     }
-    
+
     .metric-card {
         background-color: white;
         padding: 1rem;
@@ -180,19 +180,19 @@ STREAMLIT_STYLE = """
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         margin-bottom: 1rem;
     }
-    
+
     .positive {
         color: #28A745;
     }
-    
+
     .negative {
         color: #DC3545;
     }
-    
+
     .neutral {
         color: #6C757D;
     }
-    
+
     .sidebar-info {
         background-color: #F8F9FA;
         padding: 1rem;

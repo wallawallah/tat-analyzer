@@ -1,7 +1,7 @@
 """
 Utils package for TAT-Analyzer.
 
-This package contains utility modules for data loading, calculations, 
+This package contains utility modules for data loading, calculations,
 charts, and constants used throughout the application.
 """
 

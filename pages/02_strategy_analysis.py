@@ -12,7 +12,6 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
-from plotly.subplots import make_subplots
 
 # Add the project root to the Python path
 sys.path.append(str(Path(__file__).parent.parent))
@@ -23,7 +22,11 @@ from utils.calculations import (
     calculate_strategy_performance,
     calculate_win_rate,
 )
-from utils.charts import create_pnl_chart, create_strategy_performance_chart, create_trade_timing_chart
+from utils.charts import (
+    create_pnl_chart,
+    create_strategy_performance_chart,
+    create_trade_timing_chart,
+)
 from utils.constants import CHART_COLORS, STREAMLIT_STYLE
 from utils.filters import FilterManager
 

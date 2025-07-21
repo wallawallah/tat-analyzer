@@ -16,7 +16,6 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 from utils.calculations import (
     calculate_pnl_metrics,
-    calculate_time_based_performance,
     calculate_win_rate,
 )
 from utils.charts import create_pnl_chart, create_strategy_performance_chart
@@ -218,7 +217,7 @@ def display_performance_summary(df: pd.DataFrame):
     with col1:
         # Trade type distribution pie chart
         trade_type_counts = df['TradeType'].value_counts()
-        
+
         import plotly.express as px
         fig_pie = px.pie(
             values=trade_type_counts.values,
@@ -247,12 +246,12 @@ def display_monthly_heatmap(df: pd.DataFrame):
             if not monthly_data.empty:
                 # Create a Plotly heatmap instead of using pandas styling
                 import plotly.graph_objects as go
-                
+
                 # Prepare data for heatmap
                 years = monthly_data.index.tolist()
                 months = monthly_data.columns.tolist()
                 values = monthly_data.values
-                
+
                 # Create heatmap
                 fig_heatmap = go.Figure(data=go.Heatmap(
                     z=values,
@@ -263,16 +262,16 @@ def display_monthly_heatmap(df: pd.DataFrame):
                     text=[[f"${val:,.0f}" if not pd.isna(val) else "" for val in row] for row in values],
                     texttemplate="%{text}",
                     textfont={"size": 10},
-                    colorbar=dict(title="P&L ($)")
+                    colorbar={"title": "P&L ($)"}
                 ))
-                
+
                 fig_heatmap.update_layout(
                     title="Monthly P&L Performance",
                     xaxis_title="Month",
                     yaxis_title="Year",
                     height=400
                 )
-                
+
                 st.plotly_chart(fig_heatmap, use_container_width=True)
             else:
                 st.info("Insufficient data for monthly heatmap.")

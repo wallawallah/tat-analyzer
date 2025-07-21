@@ -4,20 +4,19 @@ Trade analysis calculations for TAT-Analyzer.
 This module contains functions for calculating various trading metrics and performance indicators.
 """
 
-from typing import Dict, List, Tuple
 
 import numpy as np
 import pandas as pd
 from loguru import logger
 
 
-def calculate_pnl_metrics(df: pd.DataFrame) -> Dict[str, float]:
+def calculate_pnl_metrics(df: pd.DataFrame) -> dict[str, float]:
     """
     Calculate comprehensive P&L metrics for the trade data.
-    
+
     Args:
         df: DataFrame containing trade data
-        
+
     Returns:
         Dictionary containing P&L metrics
     """
@@ -27,7 +26,7 @@ def calculate_pnl_metrics(df: pd.DataFrame) -> Dict[str, float]:
     # Calculate slippage statistics
     avg_slippage = df['Slippage'].mean() if 'Slippage' in df.columns else 0.0
     total_slippage = df['Slippage'].sum() if 'Slippage' in df.columns else 0.0
-    
+
     # Calculate premium sold (positive premium indicates premium received)
     premium_sold = df[df['TotalPremium'] > 0]['TotalPremium'].sum() if 'TotalPremium' in df.columns else 0.0
 
@@ -53,22 +52,22 @@ def calculate_pnl_metrics(df: pd.DataFrame) -> Dict[str, float]:
     return metrics
 
 
-def calculate_win_rate(df: pd.DataFrame) -> Dict[str, float]:
+def calculate_win_rate(df: pd.DataFrame) -> dict[str, float]:
     """
     Calculate win rate and related statistics.
-    
+
     Args:
         df: DataFrame containing trade data
-        
+
     Returns:
         Dictionary containing win rate metrics
     """
     if df.empty:
         return {}
 
-    winners = df[df['IsWinner'] == True]
-    losers = df[df['IsWinner'] == False]
-    
+    winners = df[df['IsWinner']]
+    losers = df[not df['IsWinner']]
+
     # Calculate trade status breakdowns
     stopped_trades = len(df[df['Status'] == 'Stopped']) if 'Status' in df.columns else 0
     expired_trades = len(df[df['Status'] == 'Expired']) if 'Status' in df.columns else 0
@@ -94,13 +93,13 @@ def calculate_win_rate(df: pd.DataFrame) -> Dict[str, float]:
     return metrics
 
 
-def calculate_drawdown(df: pd.DataFrame) -> Dict[str, float]:
+def calculate_drawdown(df: pd.DataFrame) -> dict[str, float]:
     """
     Calculate drawdown metrics for the trade data.
-    
+
     Args:
         df: DataFrame containing trade data sorted by date
-        
+
     Returns:
         Dictionary containing drawdown metrics
     """
@@ -139,10 +138,10 @@ def calculate_drawdown(df: pd.DataFrame) -> Dict[str, float]:
 def calculate_strategy_performance(df: pd.DataFrame) -> pd.DataFrame:
     """
     Calculate performance metrics grouped by strategy.
-    
+
     Args:
         df: DataFrame containing trade data
-        
+
     Returns:
         DataFrame with strategy performance metrics
     """
@@ -175,7 +174,7 @@ def calculate_strategy_performance(df: pd.DataFrame) -> pd.DataFrame:
 
     # Calculate PCR for each strategy
     strategy_stats['PCR_Percent'] = 0.0
-    for idx, row in strategy_stats.iterrows():
+    for idx, _row in strategy_stats.iterrows():
         strategy_name = "Unknown"
         try:
             # The strategy name is in the index at this point
@@ -195,11 +194,11 @@ def calculate_strategy_performance(df: pd.DataFrame) -> pd.DataFrame:
 def calculate_time_based_performance(df: pd.DataFrame, period: str = 'daily') -> pd.DataFrame:
     """
     Calculate performance metrics over time periods.
-    
+
     Args:
         df: DataFrame containing trade data
         period: Time period for grouping ('daily', 'weekly', 'monthly')
-        
+
     Returns:
         DataFrame with time-based performance metrics
     """
@@ -235,13 +234,13 @@ def calculate_time_based_performance(df: pd.DataFrame, period: str = 'daily') ->
     return time_stats.reset_index()
 
 
-def calculate_risk_metrics(df: pd.DataFrame) -> Dict[str, float]:
+def calculate_risk_metrics(df: pd.DataFrame) -> dict[str, float]:
     """
     Calculate risk-related metrics for the trade data.
-    
+
     Args:
         df: DataFrame containing trade data
-        
+
     Returns:
         Dictionary containing risk metrics
     """
@@ -279,7 +278,7 @@ def _calculate_pcr(df: pd.DataFrame) -> float:
 
     # Filter for credit trades only (positive PriceOpen)
     try:
-        credit_trades = df[df['IsCreditTrade'] == True]
+        credit_trades = df[df['IsCreditTrade']]
 
         if credit_trades.empty:
             return 0.0
@@ -325,8 +324,8 @@ def _calculate_expectancy(df: pd.DataFrame) -> float:
     if df.empty:
         return 0.0
 
-    winners = df[df['IsWinner'] == True]
-    losers = df[df['IsWinner'] == False]
+    winners = df[df['IsWinner']]
+    losers = df[not df['IsWinner']]
 
     if len(winners) == 0 or len(losers) == 0:
         return df['NetPnL'].mean()
@@ -368,7 +367,7 @@ def _calculate_sortino_ratio(df: pd.DataFrame, target_return: float = 0.0) -> fl
     return excess_returns / downside_deviation if downside_deviation > 0 else 0.0
 
 
-def _find_drawdown_periods(cumulative_pnl: pd.Series, running_max: pd.Series) -> List[Tuple[int, int]]:
+def _find_drawdown_periods(cumulative_pnl: pd.Series, running_max: pd.Series) -> list[tuple[int, int]]:
     """Find periods of drawdown in the cumulative P&L."""
     drawdown = cumulative_pnl - running_max
     in_drawdown = drawdown < 0

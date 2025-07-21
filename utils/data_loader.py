@@ -16,13 +16,13 @@ from loguru import logger
 def load_trades_data(csv_path: str) -> pd.DataFrame:
     """
     Load and preprocess trade data from CSV file.
-    
+
     Args:
         csv_path: Path to the CSV file containing trade data
-        
+
     Returns:
         DataFrame with cleaned and processed trade data
-        
+
     Raises:
         FileNotFoundError: If the CSV file doesn't exist
         ValueError: If the CSV file has invalid format
@@ -61,10 +61,10 @@ def load_trades_data(csv_path: str) -> pd.DataFrame:
 def _preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
     """
     Preprocess the trade data for analysis.
-    
+
     Args:
         df: Raw DataFrame from CSV
-        
+
     Returns:
         Preprocessed DataFrame
     """
@@ -133,10 +133,10 @@ def _preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
 def get_data_summary(df: pd.DataFrame) -> dict:
     """
     Get summary statistics for the trade data.
-    
+
     Args:
         df: Trade data DataFrame
-        
+
     Returns:
         Dictionary containing summary statistics
     """
@@ -160,10 +160,10 @@ def get_data_summary(df: pd.DataFrame) -> dict:
 def validate_csv_format(csv_path: str) -> tuple[bool, Optional[str]]:
     """
     Validate if the CSV file has the expected format.
-    
+
     Args:
         csv_path: Path to the CSV file
-        
+
     Returns:
         Tuple of (is_valid, error_message)
     """

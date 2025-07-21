@@ -61,7 +61,7 @@ def main():
         st.markdown("### Navigation")
         st.markdown("""
         Use the pages in the sidebar to explore different aspects of your trading data:
-        
+
         - **Overview**: Key metrics and performance summary
         - **Strategy Analysis**: Performance by strategy
         - **Trade Details**: Individual trade analysis
@@ -158,7 +158,7 @@ def display_data_summary():
 
         with col2:
             # Color the P&L metric based on positive/negative
-            pnl_color = "positive" if summary['total_pnl'] >= 0 else "negative"
+            "positive" if summary['total_pnl'] >= 0 else "negative"
             st.metric(
                 "Total P&L",
                 f"${summary['total_pnl']:,.2f}",
@@ -179,21 +179,21 @@ def display_welcome_message():
 
     st.markdown("""
     This dashboard helps you analyze your trading performance using data exported from Trade Automation Toolbox.
-    
+
     ### Getting Started
     1. **Upload your CSV file** using the sidebar, or
     2. **Use the sample data** to explore the dashboard features
-    
+
     ### Features
     - **Performance Overview**: Key metrics, P&L charts, and win rate analysis
     - **Strategy Analysis**: Compare performance across different strategies
     - **Trade Details**: Search and filter individual trades
     - **Risk Analysis**: Drawdown analysis and risk metrics
-    
+
     ### About Your Data
     The dashboard expects CSV files exported from Trade Automation Toolbox with the following columns:
     - Account, Date, TradeType, ProfitLoss, Status, Strategy, and others
-    
+
     All data is processed locally - nothing is sent to external servers.
     """)
 

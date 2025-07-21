@@ -10,18 +10,18 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from .constants import CHART_COLORS, CHART_THEME
 from .calculations import _calculate_pcr
+from .constants import CHART_COLORS, CHART_THEME
 
 
 def create_pnl_chart(df: pd.DataFrame, chart_type: str = 'cumulative') -> go.Figure:
     """
     Create P&L chart showing cumulative or daily performance.
-    
+
     Args:
         df: DataFrame containing trade data
         chart_type: Type of chart ('cumulative', 'daily', 'monthly')
-        
+
     Returns:
         Plotly figure object
     """
@@ -43,12 +43,12 @@ def create_pnl_chart(df: pd.DataFrame, chart_type: str = 'cumulative') -> go.Fig
 def create_distribution_chart(df: pd.DataFrame, column: str, chart_type: str = 'histogram') -> go.Figure:
     """
     Create distribution chart for specified column.
-    
+
     Args:
         df: DataFrame containing trade data
         column: Column to analyze
         chart_type: Type of chart ('histogram', 'box', 'violin')
-        
+
     Returns:
         Plotly figure object
     """
@@ -68,10 +68,10 @@ def create_distribution_chart(df: pd.DataFrame, column: str, chart_type: str = '
 def create_strategy_performance_chart(df: pd.DataFrame) -> go.Figure:
     """
     Create strategy performance comparison chart.
-    
+
     Args:
         df: DataFrame containing trade data
-        
+
     Returns:
         Plotly figure object
     """
@@ -96,7 +96,7 @@ def create_strategy_performance_chart(df: pd.DataFrame) -> go.Figure:
             strategy_stats.loc[idx, 'PCR_Percent'] = _calculate_pcr(strategy_data)
 
     # Color bars based on positive/negative P&L
-    bar_colors = [CHART_COLORS['positive'] if pnl >= 0 else CHART_COLORS['negative'] 
+    bar_colors = [CHART_COLORS['positive'] if pnl >= 0 else CHART_COLORS['negative']
                   for pnl in strategy_stats['Total_PnL']]
 
     # Create figure with single y-axis
@@ -109,22 +109,22 @@ def create_strategy_performance_chart(df: pd.DataFrame) -> go.Figure:
             y=strategy_stats['Total_PnL'],
             name='Total P&L',
             marker_color=bar_colors,
-            text=[f"PnL: ${pnl:,.0f}<br>PCR: {pcr:.1f}%<br>WR: {wr:.1f}%" for pnl, wr, pcr in 
+            text=[f"PnL: ${pnl:,.0f}<br>PCR: {pcr:.1f}%<br>WR: {wr:.1f}%" for pnl, wr, pcr in
                   zip(strategy_stats['Total_PnL'], strategy_stats['Win_Rate'], strategy_stats['PCR_Percent'])],
             textposition='auto',
-            textfont=dict(size=10, color='white'),
+            textfont={'size': 10, 'color': 'white'},
         )
     )
 
     # Update layout
     fig.update_xaxes(title_text="Strategy")
     fig.update_yaxes(title_text="Total P&L ($)")
-    
+
     # Create layout config and override showlegend
     layout_config = CHART_THEME.copy()
     layout_config['title'] = "Strategy Performance Comparison"
     layout_config['showlegend'] = False
-    
+
     fig.update_layout(**layout_config)
 
     return fig
@@ -133,11 +133,11 @@ def create_strategy_performance_chart(df: pd.DataFrame) -> go.Figure:
 def create_trade_timing_chart(df: pd.DataFrame, granularity: str = 'Hour') -> go.Figure:
     """
     Create chart showing trade timing patterns.
-    
+
     Args:
         df: DataFrame containing trade data
         granularity: Time granularity - 'Hour', '30min', or '15min'
-        
+
     Returns:
         Plotly figure object
     """
@@ -196,7 +196,7 @@ def create_trade_timing_chart(df: pd.DataFrame, granularity: str = 'Hour') -> go
     )
 
     # Create color mapping for P&L bars (green for profit, red for loss)
-    bar_colors = [CHART_COLORS['positive'] if pnl >= 0 else CHART_COLORS['negative'] 
+    bar_colors = [CHART_COLORS['positive'] if pnl >= 0 else CHART_COLORS['negative']
                   for pnl in time_stats['Total_PnL']]
 
     # P&L by time period
@@ -234,7 +234,7 @@ def create_trade_timing_chart(df: pd.DataFrame, granularity: str = 'Hour') -> go
     fig.update_xaxes(title_text=x_title, row=2, col=1)
     fig.update_yaxes(title_text="P&L ($)", row=1, col=1)
     fig.update_yaxes(title_text="Trade Count", row=2, col=1)
-    
+
     # Rotate x-axis labels for better readability when showing time ranges
     if granularity in ['30min', '15min']:
         fig.update_xaxes(tickangle=45, row=1, col=1)
@@ -251,10 +251,10 @@ def create_trade_timing_chart(df: pd.DataFrame, granularity: str = 'Hour') -> go
 def create_drawdown_chart(df: pd.DataFrame) -> go.Figure:
     """
     Create drawdown chart showing underwater equity curve.
-    
+
     Args:
         df: DataFrame containing trade data
-        
+
     Returns:
         Plotly figure object
     """
@@ -275,7 +275,7 @@ def create_drawdown_chart(df: pd.DataFrame) -> go.Figure:
             y=drawdown,
             fill='tonexty',
             fillcolor=CHART_COLORS['negative_alpha'],
-            line=dict(color=CHART_COLORS['negative'], width=2),
+            line={'color': CHART_COLORS['negative'], 'width': 2},
             name='Drawdown',
             mode='lines'
         )
@@ -302,10 +302,10 @@ def create_drawdown_chart(df: pd.DataFrame) -> go.Figure:
 def create_trade_duration_chart(df: pd.DataFrame) -> go.Figure:
     """
     Create chart showing trade duration analysis.
-    
+
     Args:
         df: DataFrame containing trade data
-        
+
     Returns:
         Plotly figure object
     """
@@ -348,7 +348,7 @@ def _create_cumulative_pnl_chart(df: pd.DataFrame) -> go.Figure:
             y=cumulative_pnl,
             mode='lines',
             name='Cumulative P&L',
-            line=dict(color=CHART_COLORS['primary'], width=3),
+            line={'color': CHART_COLORS['primary'], 'width': 3},
             fill='tonexty',
             fillcolor=CHART_COLORS['primary_alpha']
         )
@@ -504,12 +504,12 @@ def _create_empty_chart(message: str) -> go.Figure:
         x=0.5,
         y=0.5,
         showarrow=False,
-        font=dict(size=16, color="gray")
+        font={'size': 16, 'color': "gray"}
     )
 
     fig.update_layout(
-        xaxis=dict(showgrid=False, showticklabels=False),
-        yaxis=dict(showgrid=False, showticklabels=False),
+        xaxis={'showgrid': False, 'showticklabels': False},
+        yaxis={'showgrid': False, 'showticklabels': False},
         **CHART_THEME
     )
 

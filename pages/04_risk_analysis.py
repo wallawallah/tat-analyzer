@@ -176,7 +176,7 @@ def display_drawdown_analysis(df: pd.DataFrame):
             y=cumulative_pnl,
             mode='lines',
             name='Cumulative P&L',
-            line=dict(color=CHART_COLORS['primary'], width=2)
+            line={"color": CHART_COLORS['primary'], "width": 2}
         ),
         row=1, col=1
     )
@@ -188,7 +188,7 @@ def display_drawdown_analysis(df: pd.DataFrame):
             y=running_max,
             mode='lines',
             name='Running Maximum',
-            line=dict(color=CHART_COLORS['secondary'], width=1, dash='dash')
+            line={"color": CHART_COLORS['secondary'], "width": 1, "dash": 'dash'}
         ),
         row=1, col=1
     )
@@ -200,7 +200,7 @@ def display_drawdown_analysis(df: pd.DataFrame):
             y=drawdown,
             mode='lines',
             name='Drawdown',
-            line=dict(color=CHART_COLORS['negative'], width=2),
+            line={"color": CHART_COLORS['negative'], "width": 2},
             fill='tonexty',
             fillcolor=CHART_COLORS['negative_alpha']
         ),
@@ -295,13 +295,13 @@ def display_risk_distribution(df: pd.DataFrame):
                 y=rolling_return,
                 mode='markers',
                 name='Risk-Return Points',
-                marker=dict(
-                    color=range(len(rolling_risk)),
-                    colorscale='Viridis',
-                    size=8,
-                    showscale=True,
-                    colorbar=dict(title="Time")
-                ),
+                marker={
+                    "color": range(len(rolling_risk)),
+                    "colorscale": 'Viridis',
+                    "size": 8,
+                    "showscale": True,
+                    "colorbar": {"title": "Time"}
+                },
                 text=df_sorted['OpenDateTime'].dt.strftime('%Y-%m-%d'),
                 hovertemplate='Risk: %{x:.2f}<br>Return: %{y:.2f}<br>Date: %{text}<extra></extra>'
             )

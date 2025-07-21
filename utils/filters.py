@@ -115,7 +115,7 @@ class DateRangeFilter(BaseFilter):
             # Get start of last week (Monday)
             start_of_last_week = today - timedelta(days=today.weekday() + 7)
             end_of_last_week = start_of_last_week + timedelta(days=6)
-            return df[(df[self.date_column].dt.date >= start_of_last_week) & 
+            return df[(df[self.date_column].dt.date >= start_of_last_week) &
                      (df[self.date_column].dt.date <= end_of_last_week)]
 
         # Handle month-based ranges
@@ -134,7 +134,7 @@ class DateRangeFilter(BaseFilter):
                 start_of_last_month = today.replace(month=today.month - 1, day=1)
             # Get last day of last month
             end_of_last_month = today.replace(day=1) - timedelta(days=1)
-            return df[(df[self.date_column].dt.date >= start_of_last_month) & 
+            return df[(df[self.date_column].dt.date >= start_of_last_month) &
                      (df[self.date_column].dt.date <= end_of_last_month)]
 
         # For other ranges (numeric days back)
