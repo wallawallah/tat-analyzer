@@ -1,7 +1,8 @@
 # TAT-Analyzer
 
 A comprehensive trading performance dashboard for analyzing Trade Automation Toolbox (TAT) CSV exports.
-** TAT-Analyzer is currently in preview beta mode. Development is ongoing. Please report any bugs / feature requests via github issues  **
+
+**TAT-Analyzer is currently in preview beta mode. Development is ongoing. Please report any bugs / feature requests via github issues **
 
 ## Features
 
