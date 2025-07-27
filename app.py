@@ -97,6 +97,13 @@ def main():
         - **Trade Details**: Individual trade analysis
         - **Risk Analysis**: Risk metrics and drawdown
         """)
+        
+        # Support section
+        st.markdown("---")
+        st.markdown("### Support This Project")
+        st.markdown("If you find this tool helpful, consider buying me a coffee! ☕")
+        
+        st.link_button("☕ Buy me a coffee", "https://coff.ee/wallawallah", use_container_width=True)
 
     # Main content area
     if not st.session_state.data_loaded:
