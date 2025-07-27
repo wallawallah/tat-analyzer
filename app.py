@@ -25,7 +25,7 @@ st.set_page_config(**PAGE_CONFIG)
 st.markdown(STREAMLIT_STYLE, unsafe_allow_html=True)
 
 
-@st.dialog("Terms and Conditions")
+@st.dialog("Disclaimer")
 def show_disclaimer():
     """Display disclaimer modal for production usage."""
     try:
