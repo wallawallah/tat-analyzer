@@ -25,6 +25,36 @@ st.set_page_config(**PAGE_CONFIG)
 st.markdown(STREAMLIT_STYLE, unsafe_allow_html=True)
 
 
+@st.dialog("Terms and Conditions")
+def show_disclaimer():
+    """Display disclaimer modal for production usage."""
+    try:
+        with open("disclaimer", "r") as f:
+            disclaimer_content = f.read()
+    except FileNotFoundError:
+        disclaimer_content = """
+        <div class="modal-body">
+        <h5>Educational Purposes Only</h5>
+        <p>This application is for <strong>informational and educational purposes only</strong>. 
+        By using this application, you acknowledge and agree that you are solely responsible for your trading decisions.</p>
+        </div>
+        """
+    
+    st.markdown(disclaimer_content, unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        if st.button("Decline", use_container_width=True):
+            st.error("You must accept the terms to use this application.")
+            st.stop()
+    
+    with col2:
+        if st.button("Accept", use_container_width=True, type="primary"):
+            st.session_state.disclaimer_accepted = True
+            st.rerun()
+
+
 def main():
     """Main application function."""
     st.markdown('<h1 class="main-header">TAT-Analyzer Dashboard</h1>', unsafe_allow_html=True)
@@ -36,21 +66,21 @@ def main():
         st.session_state.trade_data = None
     if 'data_summary' not in st.session_state:
         st.session_state.data_summary = None
+    if 'disclaimer_accepted' not in st.session_state:
+        st.session_state.disclaimer_accepted = False
+
+    # Check if running in production mode and show disclaimer if needed
+    is_development_mode = st.get_option("global.developmentMode")
+    if not is_development_mode and not st.session_state.disclaimer_accepted:
+        show_disclaimer()
+        return
 
     # Sidebar for data loading and navigation
     with st.sidebar:
         st.header("Data Loading")
 
-        # Data loading options
-        data_source = st.radio(
-            "Choose data source:",
-            ["Upload CSV file", "Use sample data"]
-        )
-
-        if data_source == "Upload CSV file":
-            load_uploaded_data()
-        else:
-            load_sample_data()
+        # Data loading
+        load_uploaded_data()
 
         # Show data summary if loaded
         if st.session_state.data_loaded:
@@ -117,29 +147,6 @@ def load_uploaded_data():
             Path(temp_path).unlink(missing_ok=True)
 
 
-def load_sample_data():
-    """Load sample data from the existing CSV file."""
-    sample_file_path = "export-2025-7-9.csv"
-
-    if st.button("Load Sample Data"):
-        if not Path(sample_file_path).exists():
-            st.error(f"Sample file not found: {sample_file_path}")
-            return
-
-        try:
-            with st.spinner("Loading sample trade data..."):
-                df = load_trades_data(sample_file_path)
-                st.session_state.trade_data = df
-                st.session_state.data_summary = get_data_summary(df)
-                st.session_state.data_loaded = True
-
-            st.success(f"Successfully loaded {len(df)} trades from sample data!")
-            logger.info(f"Loaded {len(df)} trades from sample file")
-
-        except Exception as e:
-            st.error(f"Error loading sample data: {str(e)}")
-            logger.error(f"Error loading sample data: {str(e)}")
-
 
 def display_data_summary():
     """Display data summary in sidebar."""
@@ -157,8 +164,6 @@ def display_data_summary():
             st.metric("Accounts", summary['accounts'])
 
         with col2:
-            # Color the P&L metric based on positive/negative
-            "positive" if summary['total_pnl'] >= 0 else "negative"
             st.metric(
                 "Total P&L",
                 f"${summary['total_pnl']:,.2f}",
@@ -181,8 +186,7 @@ def display_welcome_message():
     This dashboard helps you analyze your trading performance using data exported from Trade Automation Toolbox.
 
     ### Getting Started
-    1. **Upload your CSV file** using the sidebar, or
-    2. **Use the sample data** to explore the dashboard features
+    1. **Upload your CSV file** using the sidebar to get started
 
     ### Features
     - **Performance Overview**: Key metrics, P&L charts, and win rate analysis
