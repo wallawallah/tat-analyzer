@@ -4,12 +4,110 @@ Data loading utilities for TAT-Analyzer.
 This module handles loading and preprocessing of trade data from CSV files.
 """
 
+import csv
+import re
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple
 
 import pandas as pd
 import streamlit as st
 from loguru import logger
+
+
+def detect_csv_format(csv_path: str) -> Tuple[str, str, str]:
+    """
+    Detect CSV delimiter, decimal separator, and date format.
+    
+    Args:
+        csv_path: Path to the CSV file
+        
+    Returns:
+        Tuple of (delimiter, decimal_separator, date_format)
+    """
+    try:
+        with open(csv_path, 'r', encoding='utf-8') as f:
+            # Read first few lines to analyze
+            sample_lines = [f.readline() for _ in range(min(5, sum(1 for _ in f) + 1))]
+        
+        # Reset file pointer and read again
+        with open(csv_path, 'r', encoding='utf-8') as f:
+            sample = f.read(2048)  # First 2KB
+        
+        # Detect delimiter using CSV sniffer
+        sniffer = csv.Sniffer()
+        try:
+            delimiter = sniffer.sniff(sample, delimiters=',;').delimiter
+        except:
+            # Fallback: count occurrences
+            comma_count = sample.count(',')
+            semicolon_count = sample.count(';')
+            delimiter = ';' if semicolon_count > comma_count else ','
+        
+        # Detect decimal separator by looking at numeric patterns
+        decimal_separator = '.'  # Default
+        
+        # Look for patterns like "1,23" vs "1.23" in numeric contexts
+        comma_decimal_pattern = r'\d+,\d{1,6}(?:[^\d,]|$)'
+        period_decimal_pattern = r'\d+\.\d{1,6}(?:[^\d.]|$)'
+        
+        comma_decimals = len(re.findall(comma_decimal_pattern, sample))
+        period_decimals = len(re.findall(period_decimal_pattern, sample))
+        
+        # If we find more comma decimals and delimiter is semicolon, likely European format
+        if comma_decimals > period_decimals and delimiter == ';':
+            decimal_separator = ','
+        
+        # Detect date format by looking for DD.MM.YYYY vs MM/DD/YYYY patterns
+        date_format = '%m/%d/%Y'  # Default US format
+        
+        # Look for European date patterns (DD.MM.YYYY)
+        european_date_pattern = r'\b\d{1,2}\.\d{1,2}\.\d{4}\b'
+        us_date_pattern = r'\b\d{1,2}/\d{1,2}/\d{4}\b'
+        iso_date_pattern = r'\b\d{4}-\d{1,2}-\d{1,2}\b'
+        
+        european_dates = len(re.findall(european_date_pattern, sample))
+        us_dates = len(re.findall(us_date_pattern, sample))
+        iso_dates = len(re.findall(iso_date_pattern, sample))
+        
+        if european_dates > us_dates and european_dates > 0:
+            date_format = '%d.%m.%Y'
+        elif iso_dates > us_dates and iso_dates > european_dates:
+            date_format = '%Y-%m-%d'
+        
+        logger.info(f"Detected CSV format - delimiter: '{delimiter}', decimal: '{decimal_separator}', date: '{date_format}'")
+        return delimiter, decimal_separator, date_format
+        
+    except Exception as e:
+        logger.warning(f"Could not detect CSV format, using defaults: {e}")
+        return ',', '.', '%m/%d/%Y'
+
+
+def preprocess_locale_numbers(df: pd.DataFrame, decimal_separator: str) -> pd.DataFrame:
+    """
+    Preprocess numeric columns to handle locale-specific decimal separators.
+    
+    Args:
+        df: DataFrame with potentially locale-specific numbers
+        decimal_separator: The decimal separator used in the data (',' or '.')
+        
+    Returns:
+        DataFrame with standardized numeric columns
+    """
+    if decimal_separator == ',':
+        # Convert comma decimals to period decimals for pandas
+        numeric_columns = [
+            'StopMultiple', 'PriceOpen', 'PriceClose', 'PriceStopTarget',
+            'TotalPremium', 'Qty', 'Commission', 'ProfitLoss', 'BuyingPower',
+            'StopMultipleResult', 'Slippage', 'PutDelta', 'CallDelta',
+            'PriceLong', 'PriceShort'
+        ]
+        
+        for col in numeric_columns:
+            if col in df.columns:
+                # Convert comma decimals to period decimals
+                df[col] = df[col].astype(str).str.replace(',', '.', regex=False)
+    
+    return df
 
 
 @st.cache_data
@@ -32,9 +130,15 @@ def load_trades_data(csv_path: str) -> pd.DataFrame:
         if not Path(csv_path).exists():
             raise FileNotFoundError(f"CSV file not found: {csv_path}")
 
-        # Load CSV data
-        df = pd.read_csv(csv_path)
-        logger.info(f"Loaded {len(df)} trades from {csv_path}")
+        # Detect CSV format (delimiter, decimal separator, and date format)
+        delimiter, decimal_separator, date_format = detect_csv_format(csv_path)
+
+        # Load CSV data with detected delimiter and proper quoting
+        df = pd.read_csv(csv_path, delimiter=delimiter, quoting=csv.QUOTE_ALL, on_bad_lines='skip')
+        logger.info(f"Loaded {len(df)} trades from {csv_path} using delimiter '{delimiter}'")
+
+        # Preprocess locale-specific numbers before validation
+        df = preprocess_locale_numbers(df, decimal_separator)
 
         # Validate required columns
         required_columns = [
@@ -48,22 +152,39 @@ def load_trades_data(csv_path: str) -> pd.DataFrame:
             raise ValueError(f"Missing required columns: {missing_columns}")
 
         # Data preprocessing
-        df = _preprocess_data(df)
+        df = _preprocess_data(df, date_format)
 
         logger.info(f"Processed {len(df)} trades successfully")
         return df
 
-    except Exception as e:
-        logger.error(f"Error loading trade data: {str(e)}")
+    except FileNotFoundError:
+        logger.error(f"CSV file not found: {csv_path}")
         raise
+    except pd.errors.EmptyDataError:
+        logger.error(f"CSV file is empty: {csv_path}")
+        raise ValueError("The uploaded CSV file is empty. Please check your file.")
+    except pd.errors.ParserError as e:
+        logger.error(f"CSV parsing error: {str(e)}")
+        raise ValueError(f"Unable to parse CSV file. This might be due to formatting issues or unexpected delimiters. Error: {str(e)}")
+    except ValueError as e:
+        if "Missing required columns" in str(e):
+            logger.error(f"Column validation failed: {str(e)}")
+            raise ValueError(f"CSV file format error: {str(e)}. Please ensure you're uploading a valid TAT export file.")
+        else:
+            logger.error(f"Data validation error: {str(e)}")
+            raise
+    except Exception as e:
+        logger.error(f"Unexpected error loading trade data: {str(e)}")
+        raise ValueError(f"An unexpected error occurred while processing your CSV file. Please check the file format and try again. Error: {str(e)}")
 
 
-def _preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
+def _preprocess_data(df: pd.DataFrame, date_format: str = '%m/%d/%Y') -> pd.DataFrame:
     """
     Preprocess the trade data for analysis.
 
     Args:
         df: Raw DataFrame from CSV
+        date_format: Date format string for parsing (e.g., '%d.%m.%Y' for European)
 
     Returns:
         Preprocessed DataFrame
@@ -71,10 +192,30 @@ def _preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
     # Make a copy to avoid modifying original
     df = df.copy()
 
-    # Convert date columns
-    df['Date'] = pd.to_datetime(df['Date'])
-    df['OpenDate'] = pd.to_datetime(df['OpenDate'])
-    df['CloseDate'] = pd.to_datetime(df['CloseDate'])
+    # Convert date columns with robust parsing
+    def parse_date_with_fallback(date_series, primary_format):
+        """Parse dates with primary format and fallback options."""
+        try:
+            # Try primary format first
+            if primary_format == '%d.%m.%Y':
+                # European format - use dayfirst=True
+                return pd.to_datetime(date_series, format=primary_format, errors='coerce').fillna(
+                    pd.to_datetime(date_series, dayfirst=True, errors='coerce')
+                )
+            else:
+                # US or ISO format
+                return pd.to_datetime(date_series, format=primary_format, errors='coerce').fillna(
+                    pd.to_datetime(date_series, errors='coerce')
+                )
+        except:
+            # Ultimate fallback - let pandas infer
+            return pd.to_datetime(date_series, errors='coerce', dayfirst=(primary_format == '%d.%m.%Y'))
+    
+    df['Date'] = parse_date_with_fallback(df['Date'], date_format)
+    
+    # OpenDate and CloseDate are typically in ISO format (YYYY-MM-DD) regardless of locale
+    df['OpenDate'] = pd.to_datetime(df['OpenDate'], errors='coerce')
+    df['CloseDate'] = pd.to_datetime(df['CloseDate'], errors='coerce')
 
     # Combine date and time columns for precise timestamps
     df['OpenDateTime'] = pd.to_datetime(
@@ -168,8 +309,11 @@ def validate_csv_format(csv_path: str) -> tuple[bool, Optional[str]]:
         Tuple of (is_valid, error_message)
     """
     try:
-        # Try to read just the header
-        df = pd.read_csv(csv_path, nrows=1)
+        # Detect CSV format first
+        delimiter, decimal_separator, date_format = detect_csv_format(csv_path)
+        
+        # Try to read just the header with detected delimiter and proper quoting
+        df = pd.read_csv(csv_path, delimiter=delimiter, quoting=csv.QUOTE_ALL, nrows=1, on_bad_lines='skip')
 
         # Check for required columns
         required_columns = [
@@ -183,4 +327,4 @@ def validate_csv_format(csv_path: str) -> tuple[bool, Optional[str]]:
         return True, None
 
     except Exception as e:
-        return False, f"Error reading CSV: {str(e)}"
+        return False, f"Error reading CSV with locale detection: {str(e)}"
