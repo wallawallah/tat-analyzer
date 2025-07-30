@@ -16,7 +16,9 @@ sys.path.append(str(Path(__file__).parent))
 from loguru import logger
 
 from utils.constants import PAGE_CONFIG, STREAMLIT_STYLE
-from utils.data_loader import get_data_summary, load_trades_data, validate_csv_format
+from utils.data_loader import get_data_summary, load_trades_from_buffer
+from utils.security import validate_file_upload
+from utils.session_manager import get_session_id
 
 # Configure page
 st.set_page_config(**PAGE_CONFIG)
@@ -113,7 +115,7 @@ def main():
 
 
 def load_uploaded_data():
-    """Handle uploaded CSV file."""
+    """Handle uploaded CSV file securely without writing to disk."""
     uploaded_file = st.file_uploader(
         "Upload your TAT CSV file",
         type=['csv'],
@@ -121,37 +123,33 @@ def load_uploaded_data():
     )
 
     if uploaded_file is not None:
+        # Ensure we have a session ID
+        session_id = get_session_id()
+        
+        # Validate file upload
+        is_valid, error_message = validate_file_upload(uploaded_file)
+        if not is_valid:
+            st.error(f"Invalid file: {error_message}")
+            return
+        
         try:
-            # Save uploaded file temporarily
-            temp_path = f"temp_{uploaded_file.name}"
-            with open(temp_path, "wb") as f:
-                f.write(uploaded_file.getbuffer())
-
-            # Validate file format
-            is_valid, error_message = validate_csv_format(temp_path)
-
-            if not is_valid:
-                st.error(f"Invalid file format: {error_message}")
-                return
-
-            # Load data
+            # Create a BytesIO buffer from the uploaded file
+            import io
+            file_buffer = io.BytesIO(uploaded_file.getvalue())
+            
+            # Load data directly from memory
             with st.spinner("Loading trade data..."):
-                df = load_trades_data(temp_path)
+                df = load_trades_from_buffer(file_buffer, uploaded_file.name)
                 st.session_state.trade_data = df
                 st.session_state.data_summary = get_data_summary(df)
                 st.session_state.data_loaded = True
 
-            # Clean up temp file
-            Path(temp_path).unlink(missing_ok=True)
-
             st.success(f"Successfully loaded {len(df)} trades!")
-            logger.info(f"Loaded {len(df)} trades from uploaded file")
+            logger.info(f"Loaded {len(df)} trades from uploaded file for session {session_id}")
 
         except Exception as e:
             st.error(f"Error loading data: {str(e)}")
-            logger.error(f"Error loading uploaded data: {str(e)}")
-            # Clean up temp file on error
-            Path(temp_path).unlink(missing_ok=True)
+            logger.error(f"Error loading uploaded data for session {session_id}: {str(e)}")
 
 
 
