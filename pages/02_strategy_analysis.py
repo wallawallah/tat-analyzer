@@ -51,8 +51,11 @@ def main():
 
     # Add filters
     filter_manager.add_date_range("strategy_date_range", "Date Range", "Date", True)
-    filter_manager.add_category("strategy_template", "Template", "Template",
-                               sorted(df['Template'].unique().tolist()))
+    # Handle Template column safely
+    if 'Template' in df.columns:
+        template_values = df['Template'].dropna().unique().tolist()
+        filter_manager.add_category("strategy_template", "Template", "Template",
+                                   sorted(template_values))
 
     # Render filters and apply to data
     filter_manager.render_sidebar()

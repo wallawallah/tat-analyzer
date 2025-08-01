@@ -47,8 +47,11 @@ def main():
                                sorted(df['Strategy'].unique().tolist()))
     filter_manager.add_category("trade_type", "Trade Type", "TradeType",
                                sorted(df['TradeType'].unique().tolist()))
-    filter_manager.add_category("template", "Template", "Template",
-                               sorted(df['Template'].unique().tolist()))
+    # Handle Template column safely
+    if 'Template' in df.columns:
+        template_values = df['Template'].dropna().unique().tolist()
+        filter_manager.add_category("template", "Template", "Template",
+                                   sorted(template_values))
 
     # Render filters and apply to data
     filter_manager.render_sidebar()

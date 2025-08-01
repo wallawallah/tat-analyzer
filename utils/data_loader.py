@@ -259,6 +259,16 @@ def _preprocess_data(df: pd.DataFrame, date_format: str = '%m/%d/%Y') -> pd.Data
 
     # Clean strategy names
     df['Strategy'] = df['Strategy'].fillna('Unknown')
+    
+    # Clean template names - ensure no NaN values that would cause sorting errors
+    if 'Template' in df.columns:
+        df['Template'] = df['Template'].fillna('Unknown')
+    
+    # Ensure other categorical columns don't have NaN values that could cause sorting errors
+    categorical_columns = ['TradeType', 'Status', 'StopType', 'Account']
+    for col in categorical_columns:
+        if col in df.columns:
+            df[col] = df[col].fillna('Unknown')
 
     # Create time-based features
     df['TradeWeek'] = df['Date'].dt.isocalendar().week
