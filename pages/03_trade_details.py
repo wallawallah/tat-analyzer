@@ -18,6 +18,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 from utils.charts import create_trade_duration_chart, create_trade_timing_chart
 from utils.constants import COLUMN_DISPLAY_NAMES, STREAMLIT_STYLE
 from utils.filters import FilterManager
+from utils.ui_components import display_coffee_support
 
 # Apply custom CSS
 st.markdown(STREAMLIT_STYLE, unsafe_allow_html=True)
@@ -79,6 +80,9 @@ def main():
         filtered_df = filtered_df[filtered_df['IsWinner']]
     elif outcome_filter == 'Losers Only':
         filtered_df = filtered_df[~filtered_df['IsWinner']]
+    
+    # Add coffee support link at the end of sidebar
+    display_coffee_support()
 
     if filtered_df.empty:
         st.warning("No trades match the selected filters.")

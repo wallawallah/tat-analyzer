@@ -27,6 +27,7 @@ from utils.calculations import (
 )
 from utils.charts import create_drawdown_chart
 from utils.constants import CHART_COLORS, RISK_METRICS_DESCRIPTIONS, STREAMLIT_STYLE
+from utils.ui_components import display_coffee_support
 
 # Apply custom CSS
 st.markdown(STREAMLIT_STYLE, unsafe_allow_html=True)
@@ -47,6 +48,9 @@ def main():
         return
 
     df = st.session_state.trade_data
+    
+    # TODO: When page is re-enabled, add coffee support link at the end of sidebar
+    # display_coffee_support()
 
     # Display risk metrics overview
     display_risk_metrics(df)

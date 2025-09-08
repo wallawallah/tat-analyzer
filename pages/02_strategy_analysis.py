@@ -29,6 +29,7 @@ from utils.charts import (
 )
 from utils.constants import CHART_COLORS, STREAMLIT_STYLE
 from utils.filters import FilterManager
+from utils.ui_components import display_coffee_support
 
 # Apply custom CSS
 st.markdown(STREAMLIT_STYLE, unsafe_allow_html=True)
@@ -60,6 +61,9 @@ def main():
     # Render filters and apply to data
     filter_manager.render_sidebar()
     filtered_df = filter_manager.apply_filters(df)
+    
+    # Add coffee support link at the end of sidebar
+    display_coffee_support()
 
     if filtered_df.empty:
         st.warning("No data matches the selected filters.")

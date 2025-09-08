@@ -19,6 +19,7 @@ from utils.constants import PAGE_CONFIG, STREAMLIT_STYLE
 from utils.data_loader import get_data_summary, load_trades_from_buffer
 from utils.security import validate_file_upload
 from utils.session_manager import get_session_id
+from utils.ui_components import display_coffee_support
 
 # Configure page
 st.set_page_config(**PAGE_CONFIG)
@@ -101,11 +102,7 @@ def main():
         """)
         
         # Support section
-        st.markdown("---")
-        st.markdown("### Support This Project")
-        st.markdown("If you find this tool helpful, consider buying me a coffee! ☕")
-        
-        st.link_button("☕ Buy me a coffee", "https://coff.ee/wallawallah", use_container_width=True)
+        display_coffee_support()
 
     # Main content area
     if not st.session_state.data_loaded:
