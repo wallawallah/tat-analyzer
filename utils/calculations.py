@@ -24,8 +24,14 @@ def calculate_pnl_metrics(df: pd.DataFrame) -> dict[str, float]:
         return {}
 
     # Calculate slippage statistics
-    avg_slippage = df['Slippage'].mean() if 'Slippage' in df.columns else 0.0
-    total_slippage = df['Slippage'].sum() if 'Slippage' in df.columns else 0.0
+    # Average slippage should only be calculated for stopped trades (exit slippage)
+    if 'Slippage' in df.columns and 'Status' in df.columns:
+        stopped_trades = df[df['Status'] == 'Stopped']
+        avg_slippage = stopped_trades['Slippage'].mean() if not stopped_trades.empty else 0.0
+        total_slippage = df['Slippage'].sum()
+    else:
+        avg_slippage = 0.0
+        total_slippage = 0.0
 
     # Calculate premium sold (positive premium indicates premium received)
     premium_sold = df[df['TotalPremium'] > 0]['TotalPremium'].sum() if 'TotalPremium' in df.columns else 0.0

@@ -171,7 +171,7 @@ def display_key_metrics(df: pd.DataFrame):
         st.metric(
             "Average Slippage",
             f"${pnl_metrics.get('avg_slippage', 0):.2f}",
-            help="Average slippage per trade"
+            help="Average exit slippage for stopped trades only"
         )
 
     # Additional metrics in expandable section
